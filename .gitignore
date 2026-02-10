@@ -2,582 +2,480 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
-    <title>Snake Game Mobile - Rắn Săn Mồi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Roboto', 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: white;
-            padding: 10px;
+            background: #000;
+            height: 100vh;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
 
-        .game-container {
+        #app {
+            position: relative;
             width: 100%;
-            max-width: 400px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            height: 100%;
         }
 
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .score {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            flex: 1;
-            margin: 0 0.25rem;
-        }
-
-        #gameCanvas {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        #video {
             width: 100%;
-            max-width: 350px;
-            height: 350px;
-            touch-action: none;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
         }
 
-        .controls {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-            border: none;
-            color: white;
-            padding: 0.8rem 1.2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            touch-action: manipulation;
-            min-width: 80px;
-        }
-
-        button:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .touch-controls {
-            margin-top: 1rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: 1fr 1fr 1fr;
-            gap: 10px;
-            max-width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .direction-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #00C9FF, #92FE9D);
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .direction-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-        }
-
-        .direction-btn.up { grid-column: 2; grid-row: 1; }
-        .direction-btn.left { grid-column: 1; grid-row: 2; }
-        .direction-btn.right { grid-column: 3; grid-row: 2; }
-        .direction-btn.down { grid-column: 2; grid-row: 3; }
-
-        .game-over {
-            position: fixed;
+        #overlay {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
+            display: flex;
             justify-content: center;
-            z-index: 1000;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10;
         }
 
-        .game-over-content {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
+        .center-btn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(255, 75, 43, 0.4);
+            transition: all 0.3s;
+        }
+
+        .center-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 75, 43, 0.6);
+        }
+
+        .center-btn i {
+            font-size: 1.5rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Nút play/pause lớn giữa màn hình */
+        .play-pause-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            transition: all 0.3s;
+            opacity: 1;
+        }
+
+        .play-pause-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .play-pause-btn.show {
+            display: flex;
+        }
+
+        .play-pause-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Nút xoay màn hình */
+        .rotate-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            transition: all 0.3s;
+            opacity: 1;
+        }
+
+        .rotate-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .rotate-btn.show {
+            display: flex;
+        }
+
+        .rotate-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Nút toàn màn hình */
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            transition: all 0.3s;
+            opacity: 1;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-btn.show {
+            display: flex;
+        }
+
+        .fullscreen-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Thông tin video */
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
             max-width: 300px;
-            margin: 1rem;
+            backdrop-filter: blur(5px);
+            opacity: 1;
+            transition: opacity 0.5s;
         }
 
-        .instructions {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            opacity: 0.8;
-            line-height: 1.4;
+        #info.hidden {
+            opacity: 0;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        #title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .pulse {
-            animation: pulse 0.3s ease-in-out;
-        }
-
-        /* Responsive adjustments */
-        @media (max-height: 600px) {
-            .game-container {
-                padding: 0.5rem;
-            }
-            h1 { font-size: 1.5rem; }
-            #gameCanvas { height: 280px; }
-            .direction-btn { width: 50px; height: 50px; font-size: 1.2rem; }
-        }
-
-        @media (max-width: 350px) {
-            #gameCanvas { height: 300px; }
-            .direction-btn { width: 45px; height: 45px; }
+        .time {
+            font-size: 0.9rem;
+            color: #ccc;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🐍 Rắn Săn Mồi Mobile</h1>
+    <div id="app">
+        <video id="video"></video>
         
-        <div class="score-board">
-            <div class="score">
-                Điểm: <span id="score">0</span>
+        <div id="overlay">
+            <button id="selectBtn" class="center-btn">
+                <i class="fas fa-folder-open"></i> CHỌN VIDEO
+            </button>
+            <input type="file" id="fileInput" accept="video/*" multiple>
+        </div>
+        
+        <div id="playPauseBtn" class="play-pause-btn">
+            <i class="fas fa-play"></i>
+        </div>
+        
+        <div id="rotateBtn" class="rotate-btn">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+        
+        <div id="fullscreenBtn" class="fullscreen-btn">
+            <i class="fas fa-expand"></i>
+        </div>
+        
+        <div id="info">
+            <div id="title">Chưa có video</div>
+            <div class="time">
+                <span id="current">00:00</span> / <span id="total">00:00</span>
             </div>
-            <div class="score">
-                Cao nhất: <span id="highScore">0</span>
-            </div>
-        </div>
-
-        <canvas id="gameCanvas"></canvas>
-
-        <div class="controls">
-            <button onclick="startGame()">🎮 Chơi</button>
-            <button onclick="pauseGame()">⏸️ Dừng</button>
-            <button onclick="resetGame()">🔄 Reset</button>
-        </div>
-
-        <div class="touch-controls">
-            <button class="direction-btn up" onclick="changeDirection('up')">⬆️</button>
-            <button class="direction-btn left" onclick="changeDirection('left')">⬅️</button>
-            <button class="direction-btn right" onclick="changeDirection('right')">➡️</button>
-            <button class="direction-btn down" onclick="changeDirection('down')">⬇️</button>
-        </div>
-
-        <div class="instructions">
-            🎯 Chạm vào các nút mũi tên để điều khiển rắn<br>
-            🍎 Ăn táo để tăng điểm và kích thước<br>
-            ⚠️ Tránh đâm vào tường và thân rắn
-        </div>
-    </div>
-
-    <div class="game-over" id="gameOver">
-        <div class="game-over-content">
-            <h2>🎮 Game Over!</h2>
-            <p>Điểm của bạn: <span id="finalScore">0</span></p>
-            <p>Điểm cao nhất: <span id="finalHighScore">0</span></p>
-            <button onclick="resetGame()" style="margin-top: 1rem;">🔄 Chơi lại</button>
         </div>
     </div>
 
     <script>
-        // Game variables
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Set canvas size for mobile
-        function resizeCanvas() {
-            const container = document.querySelector('.game-container');
-            const maxSize = Math.min(window.innerWidth - 40, 350);
-            canvas.width = maxSize;
-            canvas.height = maxSize;
-        }
-        
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        const gridSize = 20;
-        let tileCount = Math.floor(canvas.width / gridSize);
-
-        let snake = [
-            {x: 10, y: 10}
-        ];
-        let food = {};
-        let dx = 0;
-        let dy = 0;
-        let score = 0;
-        let gameRunning = false;
-        let gamePaused = false;
-
-        // Load high score
-        let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
-        document.getElementById('highScore').textContent = highScore;
-
-        function generateFood() {
-            food = {
-                x: Math.floor(Math.random() * tileCount),
-                y: Math.floor(Math.random() * tileCount)
-            };
-            
-            // Make sure food doesn't spawn on snake
-            for (let segment of snake) {
-                if (segment.x === food.x && segment.y === food.y) {
-                    generateFood();
-                    return;
-                }
+        class VideoPlayer {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.fileInput = document.getElementById('fileInput');
+                this.selectBtn = document.getElementById('selectBtn');
+                this.overlay = document.getElementById('overlay');
+                this.playPauseBtn = document.getElementById('playPauseBtn');
+                this.rotateBtn = document.getElementById('rotateBtn');
+                this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.info = document.getElementById('info');
+                this.title = document.getElementById('title');
+                
+                this.rotation = 0;
+                this.isPlaying = false;
+                this.hideTimer = null;
+                
+                this.init();
             }
-        }
-
-        function drawGame() {
-            // Clear canvas with gradient
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(1, '#16213e');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw food with glow effect
-            ctx.shadowColor = '#ff6b6b';
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = '#ff6b6b';
-            ctx.beginPath();
-            ctx.arc(
-                food.x * gridSize + gridSize/2, 
-                food.y * gridSize + gridSize/2, 
-                gridSize/2 - 2, 
-                0, 
-                2 * Math.PI
-            );
-            ctx.fill();
-
-            // Draw snake with gradient
-            ctx.shadowBlur = 0;
-            snake.forEach((segment, index) => {
-                if (index === 0) {
-                    // Head
-                    const headGradient = ctx.createRadialGradient(
-                        segment.x * gridSize + gridSize/2,
-                        segment.y * gridSize + gridSize/2,
-                        0,
-                        segment.x * gridSize + gridSize/2,
-                        segment.y * gridSize + gridSize/2,
-                        gridSize/2
-                    );
-                    headGradient.addColorStop(0, '#4ecdc4');
-                    headGradient.addColorStop(1, '#44a08d');
-                    ctx.fillStyle = headGradient;
+            
+            init() {
+                this.selectBtn.addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFiles(e));
+                
+                this.playPauseBtn.addEventListener('click', () => {
+                    this.togglePlay();
+                    this.showControls();
+                });
+                
+                this.rotateBtn.addEventListener('click', () => {
+                    this.rotate();
+                    this.showControls();
+                });
+                
+                this.fullscreenBtn.addEventListener('click', () => {
+                    this.toggleFullscreen();
+                    this.showControls();
+                });
+                
+                this.video.addEventListener('click', () => {
+                    this.togglePlay();
+                    this.showControls();
+                });
+                
+                this.video.addEventListener('dblclick', () => {
+                    this.toggleFullscreen();
+                    this.showControls();
+                });
+                
+                this.video.addEventListener('timeupdate', () => this.updateTime());
+                this.video.addEventListener('loadedmetadata', () => this.updateDuration());
+                
+                this.video.addEventListener('play', () => {
+                    this.isPlaying = true;
+                    this.overlay.style.display = 'none';
+                    this.updatePlayPauseIcon();
+                    this.showControls();
+                });
+                
+                this.video.addEventListener('pause', () => {
+                    this.isPlaying = false;
+                    this.updatePlayPauseIcon();
+                    this.showControls();
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeydown(e);
+                    this.showControls();
+                });
+                
+                document.addEventListener('fullscreenchange', () => this.updateFullscreenIcon());
+                
+                document.addEventListener('mousemove', () => this.showControls());
+                document.addEventListener('touchstart', () => this.showControls());
+                
+                this.hideControls();
+            }
+            
+            handleFiles(e) {
+                for (let file of e.target.files) {
+                    if (file.type.startsWith('video/')) {
+                        const url = URL.createObjectURL(file);
+                        this.video.src = url;
+                        this.title.textContent = file.name;
+                        
+                        this.showAllControls();
+                        this.showControls();
+                        
+                        this.video.play();
+                        break;
+                    }
+                }
+                this.fileInput.value = '';
+            }
+            
+            showAllControls() {
+                this.playPauseBtn.classList.add('show');
+                this.rotateBtn.classList.add('show');
+                this.fullscreenBtn.classList.add('show');
+            }
+            
+            togglePlay() {
+                if (this.video.src) {
+                    if (this.isPlaying) {
+                        this.video.pause();
+                    } else {
+                        this.video.play();
+                    }
                 } else {
-                    // Body
-                    const bodyGradient = ctx.createRadialGradient(
-                        segment.x * gridSize + gridSize/2,
-                        segment.y * gridSize + gridSize/2,
-                        0,
-                        segment.x * gridSize + gridSize/2,
-                        segment.y * gridSize + gridSize/2,
-                        gridSize/2
-                    );
-                    bodyGradient.addColorStop(0, '#92fe9d');
-                    bodyGradient.addColorStop(1, '#00c9ff');
-                    ctx.fillStyle = bodyGradient;
+                    this.fileInput.click();
                 }
+            }
+            
+            updatePlayPauseIcon() {
+                const icon = this.playPauseBtn.querySelector('i');
+                if (this.isPlaying) {
+                    icon.className = 'fas fa-pause';
+                } else {
+                    icon.className = 'fas fa-play';
+                }
+            }
+            
+            rotate() {
+                this.rotation = (this.rotation + 90) % 360;
+                this.video.style.transform = `rotate(${this.rotation}deg)`;
+                this.rotateBtn.style.transform = `rotate(${this.rotation}deg)`;
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            updateFullscreenIcon() {
+                const icon = this.fullscreenBtn.querySelector('i');
+                if (document.fullscreenElement) {
+                    icon.className = 'fas fa-compress';
+                } else {
+                    icon.className = 'fas fa-expand';
+                }
+            }
+            
+            updateTime() {
+                const current = document.getElementById('current');
+                if (this.video.duration) {
+                    current.textContent = this.formatTime(this.video.currentTime);
+                }
+            }
+            
+            updateDuration() {
+                const total = document.getElementById('total');
+                total.textContent = this.formatTime(this.video.duration);
+            }
+            
+            showControls() {
+                if (!this.video.src) return;
                 
-                ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
-            });
-        }
-
-        function moveSnake() {
-            if (!gameRunning || gamePaused) return;
-
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-
-            // Check wall collision
-            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-                gameOver();
-                return;
-            }
-
-            // Check self collision
-            for (let segment of snake) {
-                if (head.x === segment.x && head.y === segment.y) {
-                    gameOver();
-                    return;
-                }
-            }
-
-            snake.unshift(head);
-
-            // Check food collision
-            if (head.x === food.x && head.y === food.y) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                document.querySelector('.score-board').classList.add('pulse');
-                setTimeout(() => {
-                    document.querySelector('.score-board').classList.remove('pulse');
-                }, 300);
+                this.playPauseBtn.classList.remove('hidden');
+                this.rotateBtn.classList.remove('hidden');
+                this.fullscreenBtn.classList.remove('hidden');
+                this.info.classList.remove('hidden');
                 
-                generateFood();
+                clearTimeout(this.hideTimer);
                 
-                // Vibrate on food eat (Android)
-                if (navigator.vibrate) {
-                    navigator.vibrate(50);
-                }
-            } else {
-                snake.pop();
-            }
-        }
-
-        function gameOver() {
-            gameRunning = false;
-            
-            // Update high score
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('snakeHighScore', highScore.toString());
-                document.getElementById('highScore').textContent = highScore;
+                this.hideTimer = setTimeout(() => {
+                    this.hideControls();
+                }, 3000);
             }
             
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('finalHighScore').textContent = highScore;
-            document.getElementById('gameOver').style.display = 'flex';
-            
-            // Vibrate on game over (Android)
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
-            }
-        }
-
-        function gameLoop() {
-            moveSnake();
-            drawGame();
-        }
-
-        function startGame() {
-            if (!gameRunning) {
-                gameRunning = true;
-                gamePaused = false;
-                document.getElementById('gameOver').style.display = 'none';
+            hideControls() {
+                if (!this.video.src || !this.isPlaying) return;
                 
-                if (snake.length === 1 && dx === 0 && dy === 0) {
-                    generateFood();
-                    dx = 1;
-                    dy = 0;
-                }
-            } else if (gamePaused) {
-                gamePaused = false;
-            }
-        }
-
-        function pauseGame() {
-            if (gameRunning) {
-                gamePaused = !gamePaused;
-            }
-        }
-
-        function resetGame() {
-            gameRunning = false;
-            gamePaused = false;
-            snake = [{x: 10, y: 10}];
-            dx = 0;
-            dy = 0;
-            score = 0;
-            document.getElementById('score').textContent = score;
-            document.getElementById('gameOver').style.display = 'none';
-            drawGame();
-        }
-
-        function changeDirection(direction) {
-            if (!gameRunning) {
-                startGame();
-                return;
+                this.playPauseBtn.classList.add('hidden');
+                this.rotateBtn.classList.add('hidden');
+                this.fullscreenBtn.classList.add('hidden');
+                this.info.classList.add('hidden');
             }
             
-            switch(direction) {
-                case 'up':
-                    if (dy !== 1) { dx = 0; dy = -1; }
-                    break;
-                case 'down':
-                    if (dy !== -1) { dx = 0; dy = 1; }
-                    break;
-                case 'left':
-                    if (dx !== 1) { dx = -1; dy = 0; }
-                    break;
-                case 'right':
-                    if (dx !== -1) { dx = 1; dy = 0; }
-                    break;
-            }
-            
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
-            }
-        }
-
-        // Touch and swipe controls
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        canvas.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }, {passive: false});
-
-        canvas.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-        }, {passive: false});
-
-        canvas.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            if (!gameRunning) {
-                startGame();
-                return;
-            }
-            
-            const touch = e.changedTouches[0];
-            const touchEndX = touch.clientX;
-            const touchEndY = touch.clientY;
-            
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-            const minSwipeDistance = 50;
-            
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                if (Math.abs(deltaX) > minSwipeDistance) {
-                    if (deltaX > 0) {
-                        changeDirection('right');
-                    } else {
-                        changeDirection('left');
-                    }
-                }
-            } else {
-                if (Math.abs(deltaY) > minSwipeDistance) {
-                    if (deltaY > 0) {
-                        changeDirection('down');
-                    } else {
-                        changeDirection('up');
-                    }
+            handleKeydown(e) {
+                switch(e.key) {
+                    case ' ':
+                        e.preventDefault();
+                        this.togglePlay();
+                        break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                        break;
+                    case 'r':
+                    case 'R':
+                        e.preventDefault();
+                        this.rotate();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.video.currentTime = Math.max(0, this.video.currentTime - 10);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.video.currentTime = Math.min(this.video.duration, this.video.currentTime + 10);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.video.volume = Math.min(1, this.video.volume + 0.1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.video.volume = Math.max(0, this.video.volume - 0.1);
+                        break;
+                    case 'Escape':
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        }
+                        break;
                 }
             }
-        }, {passive: false});
-
-        // Keyboard controls for desktop testing
-        document.addEventListener('keydown', function(e) {
-            switch(e.key) {
-                case 'ArrowUp':
-                    e.preventDefault();
-                    changeDirection('up');
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    changeDirection('down');
-                    break;
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    changeDirection('left');
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    changeDirection('right');
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    if (gameRunning) {
-                        pauseGame();
-                    } else {
-                        startGame();
-                    }
-                    break;
+            
+            formatTime(seconds) {
+                if (isNaN(seconds)) return '00:00';
+                const m = Math.floor(seconds / 60);
+                const s = Math.floor(seconds % 60);
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new VideoPlayer();
         });
-
-        // Initialize game
-        tileCount = Math.floor(canvas.width / gridSize);
-        drawGame();
-        
-        // Game loop
-        setInterval(gameLoop, 150);
-
-        // Prevent zoom on double tap
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
     </script>
 </body>
 </html>
